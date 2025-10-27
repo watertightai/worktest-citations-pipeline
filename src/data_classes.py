@@ -43,7 +43,6 @@ class ArxivPaper:
     authors: List[str]
     published_timestamp: str
     categories: List[str]
-    pdf_url: str
     citations: int
     citation_timestamp: str
     paper_type: Optional[str] = None  # method, survey, benchmark, resource
