@@ -56,6 +56,8 @@ jupyter notebook generate_forecasting_dataset.ipynb
 | `src/data_classes.py`                | `ForecastingQuestion` and `ArxivPaper` dataclasses - your schema |
 | `generate_forecasting_dataset.ipynb` | Template for your submission                                     |
 
+**Note on source code**: The `src/` directory contains utility code to make your life easier - you don't need to read or modify it. Just import what you need (dataclasses, evaluation functions) and focus on building your data pipeline in the notebook. The infrastructure is already built for you.
+
 ## What You Build
 
 Build **everything** from scratch in `generate_forecasting_dataset.ipynb`:
@@ -73,13 +75,13 @@ class ArxivPaper:
     citation_timestamp: str
 
 # 2. Scrape arXiv papers
-papers = scrape_arxiv_papers(categories=['cs.LG', 'cs.AI'], ...)
+papers = scrape_arxiv_papers(categories=[...], ...)
 
 # 3. Get citations from API (Semantic Scholar, Google Scholar, etc.)
 papers = add_citation_counts(papers)
 
 # 4. Create smart pairs (avoid spurious cues!)
-pairs = pair_papers(papers, min_citation_diff=2, max_days_apart=21)
+pairs = pair_papers(papers, ...)
 
 # 5. Generate questions with full paper text
 questions = [make_question(a, b) for a, b in pairs]
