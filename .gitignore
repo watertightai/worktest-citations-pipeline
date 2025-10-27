@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data
+data/arxiv_papers/
+data/fred_indicators/
+*.parquet
+*.jsonl
+*.csv
+
+# Seed directory (not distributed to candidates)
+seed/
+
+# Results
+evaluation_results/
+experiments/
+outputs/
+
+# Logs
+*.log
+
+# API keys
+.env
+.env.local
+secrets.txt
+
+# Temporary files
+tmp/
+temp/
+*.tmp
