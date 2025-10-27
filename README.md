@@ -1,41 +1,28 @@
-# Citations Pipeline Worktest - Research Engineer
+# Citations Pipeline Work Test - Research Engineer
 
 ## Overview
 
-Can you predict which research paper will be more influential? Forecasting
-questions are a powerful way to assess how good the world model of llms are. In
-this worktest we want to understand if you can effectively write a data pipeline
-that helps generate such questions at scale.
+Can you predict which of two research papers will be more influential? Questions like this are a powerful way to evaluate an AI model's research taste. Your task is to create a data pipeline for generating such questions.
 
-**The challenge**: Given two arXiv papers with full text, can Claude predict
-which will have more citations? But here's the catch - you need to design this
-evaluation carefully. Include author names and the model just pattern-matches on
-"famous researcher = more citations." Your job is to create questions that
-require actual reasoning about research quality.
+**The challenge**: Given two arXiv papers, can Claude predict
+which will have more citations, only by reasoning on the quality of the papers?
 
-**What you'll build**: A complete pipeline from scraping arXiv papers →
-collecting citations → creating smart pairs → generating questions → evaluating
-multiple Claude models. The key test: does Sonnet 4 significantly outperform
-Haiku 3.5? If not, your evaluation has problems.
+**What you'll build**: A pipeline from scraping arXiv papers →
+collecting citations → matching papers to compare → generating questions → evaluating
+multiple Claude models. Does Sonnet 4 significantly outperform
+Haiku 3.5 on criteria like accuracy, brier score and AUROC? If not, your evaluation has problems.
 
-**Why this matters**: Building good evaluations is hard. Most fail because of
-spurious correlations, ambiguous questions, or low signal-to-noise. This
-worktest tests whether you can design a data pipeline that avoids these
-pitfalls.
+**Why this matters**: Building great AI evaluations involves reasoning about how to collect, clean and manipulate data so that you can use it to measure a specific skill. An easy way to build a bad evaluation, and to fail this test, is to mess up that process. Your task is to make good design choices and go through the cleaning and filtering work to produce high quality questions. See the section on 'Data and Question Quality.'
 
-**Time**: 8-12 hours | **Submit within**: 1 week
+**AI Use**: Using AI coding assistants is allowed, but you're being scored on code *concision* and data quality. Coding assistants can produce bloated code, and introduce bugs that mess up your data quality. Be warned!
+
+**Billing**: We'll reimburse you up to $250 Anthropic API credits by default, just send us a screenshot. If you want more, please reach out.
+
+**Time**: 8-12 hours 
 
 **Full requirements**: See sections below for detailed instructions
 
 ---
-
-## What We're Testing
-
-- Data pipeline design
-- Critical thinking about spurious correlations
-- Understanding model scaling properties
-- Clear technical documentation
-- Ability to write clean, robust & understandable code
 
 ## Quick Start
 
@@ -56,11 +43,11 @@ jupyter notebook generate_forecasting_dataset.ipynb
 | `src/data_classes.py`                | `ForecastingQuestion` and `ArxivPaper` dataclasses - your schema |
 | `generate_forecasting_dataset.ipynb` | Template for your submission                                     |
 
-**Note on source code**: The `src/` directory contains utility code to make your life easier - you don't need to read or modify it. Just import what you need (dataclasses, evaluation functions) and focus on building your data pipeline in the notebook. The infrastructure is already built for you.
+**Note on source code**: The `src/` directory contains utility code to make your life easier - you don't need to read or modify it. Just import what you need (dataclasses, evaluation functions) and focus on building your data pipeline in the notebook.
 
 ## What You Build
 
-Build **everything** from scratch in `generate_forecasting_dataset.ipynb`:
+**Everything** in `generate_forecasting_dataset.ipynb`:
 
 ```python
 # 1. Your paper dataclass
@@ -92,18 +79,16 @@ df = pd.DataFrame([q.__dict__ for q in questions])
 df.to_parquet("citations_dataset.parquet")
 ```
 
-## Critical: Quality Gates at Every Step
+## Data and Question Quality
 
-Your evaluation is only as good as your data quality. At each step of your
-pipeline, evaluate against these quality gates:
+Your evaluation is only as good as your data and question quality. At each step of your
+pipeline, you should be thinking about these potential issues:
 
 ### 1. Spurious Cues
 
-**Definition**: Features that leak the answer without requiring the reasoning
-you want to test.
+**Definition**: The goal of this evaluation is to measure Claude's ability to assess the quality of a paper. We do that by having Claude guess which of two papers got more citations. Therefore, a spurious cue is any feature of the question makes it 'too easy' by letting Claude guess which paper has more citations without reasoning about the quality of a paper.
 
-Models can exploit shortcuts: metadata that correlates with the answer. If
-present, models pattern-match instead of reasoning about the actual question.
+There are several potential spurious cues in this data pipeline! A major part of your task is to reason about what they might be, and then filter them out. 
 
 ### 2. Ambiguity
 
@@ -120,8 +105,7 @@ ways.
 **Definition**: How much does performance require genuine reasoning vs. random
 guessing?
 
-If the task is too easy (obvious differences) or too hard (pure noise), you
-can't measure model capabilities. You need questions where reasoning helps but
+If the task is too easy (obvious differences) or too hard (pure noise), it's not a good evaluation. You need questions where reasoning helps but
 isn't trivial - where a smart human could do better than chance, and a smarter
 human could do better than that.
 
@@ -140,14 +124,16 @@ artifacts rather than the underlying task.
 reasoning.
 
 If your evaluation data was in the model's training set, you're measuring
-memory, not capability. For recent models, this means being careful with
-publication dates and public datasets.
+memory, not capability. This means being careful with
+paper publication dates and model training cutoff dates.
 
 ---
 
 **Key insight**: Every pipeline decision affects these quality gates. You must
 explicitly analyze how your approach addresses each gate, and document the
 tradeoffs you made.
+
+**Our Advice**: Sometimes the only way to ensure you're catching problems is to 
 
 ## Evaluation
 
@@ -160,7 +146,6 @@ predictions, metrics = await evaluate_and_plot(
     questions,
     model_ids=[
         "claude-3-5-haiku-latest",
-        "claude-3-7-sonnet-20250219",
         "claude-sonnet-4-20250929"
     ],
     output_dir=Path("evaluation_results"),
@@ -222,33 +207,20 @@ See `src/data_classes.py` for the schema. Your parquet must have these columns:
 
 ```
 ├── generate_forecasting_dataset.ipynb  # Your pipeline + documentation
-├── citations_dataset.parquet           # Your generated dataset (must match schema above)
-└── evaluation_results/                 # Model performance
+├── citations_dataset.parquet           # 500 high quality questions
+└── evaluation_results/                 # Results for Sonnet 4 and Haiku 3.5 on 100 questions
 ```
 
-**In your notebook**, document:
 
-1. Your approach (categories, pairing strategy, citation source)
-2. How you avoided spurious cues (author names, venues, etc.)
-3. Analysis of common evaluation mistakes (spurious cues, ambiguity, low
-   signal-to-noise, etc.)
-4. Evaluation results and scaling analysis (Haiku → Sonnet 3.7 → Sonnet 4)
-5. 100 example predictions with model reasoning
+## Performance Rubric
 
-## Success Criteria
-
-1. **Model scaling works**: Sonnet 4 >> Sonnet 3.7 >> Haiku 3.5
-   - If flat or inverse scaling → problem with your evaluation
-2. **No spurious cues**: You tell us what you think the spurious cues here might
-   be
-3. **Quality over quantity**: 200 excellent questions > 1,000 mediocre ones
-4. **Clear documentation**: Reproducible from your notebook
+1. Is your code clean, concise and well documented?
+2. Do you reason well about potential quality issues in your pipeline? Did you make good design choices to produce high quality questions?
+3. Are your final questions high quality?
 
 ## Submission
 
-Email to: everett@watertightai.com, tom@watertightai.com
-
-**Subject**: "Citations Pipeline Worktest - [Your Name]"
+Upload your three deliverables to a google drive folder named "Citations Pipeline Work Test - [Your Name]" and share it with: everett@watertightai.com, tom@watertightai.com
 
 **Questions?** Call or text anytime as much as you need 5207802861
 
