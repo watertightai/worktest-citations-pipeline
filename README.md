@@ -133,7 +133,7 @@ paper publication dates and model training cutoff dates.
 explicitly analyze how your approach addresses each gate, and document the
 tradeoffs you made.
 
-**Our Advice**: Sometimes the only way to ensure you're catching problems is to 
+**Our Advice**: Sometimes the only way to ensure you're catching problems is to spend a lot of time reading through the data and the questions you generate. Don't be afraid to grind!
 
 ## Evaluation
 
