@@ -771,7 +771,8 @@ def save_evaluation_results(
             f.write(f"  Brier Score:        {metrics['brier_score']:.4f}\n")
             if metrics["auroc"] is not None:
                 f.write(f"  AUROC:              {metrics['auroc']:.4f}\n")
-            f.write(f"  Log Loss:           {metrics['log_loss']:.4f}\n")
+            if metrics["log_loss"] is not None:
+                f.write(f"  Log Loss:           {metrics['log_loss']:.4f}\n")
             f.write(
                 f"  Correct:            {metrics['correct_predictions']}/{metrics['total_predictions']}\n"
             )
@@ -801,10 +802,14 @@ def save_evaluation_results(
                 f"Best AUROC:         {best_auroc[0]} ({best_auroc[1]['auroc']:.4f})\n"
             )
 
-        best_logloss = min(model_metrics.items(), key=lambda x: x[1]["log_loss"])
-        f.write(
-            f"Best Log Loss:      {best_logloss[0]} ({best_logloss[1]['log_loss']:.4f})\n"
-        )
+        if any(m["log_loss"] is not None for m in model_metrics.values()):
+            best_logloss = min(
+                model_metrics.items(),
+                key=lambda x: x[1]["log_loss"] if x[1]["log_loss"] is not None else float('inf'),
+            )
+            f.write(
+                f"Best Log Loss:      {best_logloss[0]} ({best_logloss[1]['log_loss']:.4f})\n"
+            )
 
     print(f"✅ Saved summary to {summary_file.name}")
     print(f"\n{'='*80}")
